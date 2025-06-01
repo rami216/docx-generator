@@ -15,7 +15,16 @@ def generate_docx():
 
     student_name = data.get("student_name", "Student")
     title = data.get("title", "Untitled Project")
-    content = data.get("content", {})
+    content_raw = data.get("content", {}) # Default to empty dict
+    if isinstance(content_raw, str):
+        try:
+            content = json.loads(content_raw)
+        except json.JSONDecodeError as e:
+            app.logger.error(f"Error decoding content JSON: {e}")
+            app.logger.error(f"Content received: {content_raw}")
+            return {"error": "Invalid JSON format for 'content' field"}, 400
+    else:
+        content = content_raw # Already a dict if n8n processed it correctly
 
     doc = Document()
 
