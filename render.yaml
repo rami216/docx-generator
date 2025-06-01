@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: docx-generator
+    runtime: python
+    buildCommand: ""
+    startCommand: "python docx_server.py"
