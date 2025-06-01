@@ -2,12 +2,17 @@ from flask import Flask, request, send_file
 from docx import Document
 from docx.shared import Pt, Inches
 import os
+import json
 
 app = Flask(__name__)
 
 @app.route("/generate-docx", methods=["POST"])
 def generate_docx():
+    # Safely parse JSON whether it's a dict or string
     data = request.get_json()
+    if isinstance(data, str):
+        data = json.loads(data)
+
     student_name = data.get("student_name", "Student")
     title = data.get("title", "Untitled Project")
     content = data.get("content", {})
@@ -38,7 +43,7 @@ def generate_docx():
         elif isinstance(body, dict):
             if "text" in body:
                 doc.add_paragraph(body["text"])
-            if "bullets" in body:
+            if "bullets" in body and isinstance(body["bullets"], list):
                 for bullet in body["bullets"]:
                     bullet_paragraph = doc.add_paragraph(style='List Bullet')
                     bullet_paragraph.paragraph_format.left_indent = Inches(0.5)
@@ -54,7 +59,6 @@ def generate_docx():
 def health():
     return "Docx Generator is running!"
 
-# ✅ ADD THIS PART:
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
